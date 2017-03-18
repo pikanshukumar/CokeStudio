@@ -413,6 +413,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void OnDownloadFinish(String songName){
 
+        Toast.makeText(this,"Download Finished !!",Toast.LENGTH_SHORT).show();
         DBManager dbManager = new DBManager(this);
         dbManager.open();
 

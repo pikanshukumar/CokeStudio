@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
+//import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -61,8 +61,8 @@ public class SongAdapter extends ArrayAdapter<Song> {
         final Context context = parent.getContext();
 
         // Loading image for imageView using picasso
-        Picasso.with(context)
-                .load(currentSong.getCoverImgURL()).error(R.drawable.icon_placeholder).noFade().into(image);
+//        Picasso.with(context)
+//                .load(currentSong.getCoverImgURL()).error(R.drawable.icon_placeholder).noFade().into(image);
 
         // fav icon action handling
         final ImageView fav = (ImageView) listItemView.findViewById(R.id.fav);
@@ -126,7 +126,10 @@ public class SongAdapter extends ArrayAdapter<Song> {
 //                    param.add(currentSong.getSongname());
 //                    param.add(currentSong.getSongURL());
 //                    if(downloadFileTask != null)downloadFileTask.execute(param);
-                    if(downloaded == 0)callback.onClick(currentSong);
+                    if(downloaded == 0){
+                        Toast.makeText(context,"Download started !!",Toast.LENGTH_SHORT).show();
+                        callback.onClick(currentSong);
+                    }
                     else Toast.makeText(context,"Song already downloaded",Toast.LENGTH_SHORT).show();
                 }
             }
