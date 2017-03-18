@@ -104,10 +104,19 @@ public class DBManager {
     }*/
 
     // helper fuction to update favourites in DB
-    public int updateStarData(int id, int value){
+
+    public int updateFavData(int id, int value){
         ContentValues values = new ContentValues(1);
         values.put("favourite", value);
         return cupboard().withDatabase(db).update(Song.class, values, "_id = ?", Integer.toString(id));
     }
+
+    public int updateDownloadedData(int id, int value){
+        ContentValues values = new ContentValues(1);
+        values.put("downloaded", value);
+        return cupboard().withDatabase(db).update(Song.class, values, "_id = ?", Integer.toString(id));
+    }
+
+
 
 }

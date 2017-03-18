@@ -14,11 +14,13 @@ public class Song {
     private String songURL;
     private String artistName;
     private String coverImgURL;
+    private int downloaded = 0; // download flag
+    private int favourite = 0;  // favourite flag
 
     public Song() {
     }
 
-    private int favourite = 0;
+
 
     public Song(JSONObject obj, int id) {
         this.id = id;
@@ -44,6 +46,14 @@ public class Song {
     public int isFavourite() {
 
         return this.favourite;
+    }
+
+    public int isDownloaded() {
+        return downloaded;
+    }
+
+    public void setDownloaded(int downloaded) {
+        this.downloaded = downloaded;
     }
 
     public String getSongname() {
