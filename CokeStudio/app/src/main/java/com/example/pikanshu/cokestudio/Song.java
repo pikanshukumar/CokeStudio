@@ -2,11 +2,13 @@ package com.example.pikanshu.cokestudio;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by pika on 18/3/17.
  */
 
-public class Song {
+public class Song implements Serializable {
 
     public Long _id; // for cupboard
     private int id; // personal
@@ -19,7 +21,6 @@ public class Song {
 
     public Song() {
     }
-
 
 
     public Song(JSONObject obj, int id) {
@@ -60,16 +61,32 @@ public class Song {
         return songname;
     }
 
+    public void setSongname(String songname) {
+        this.songname = songname;
+    }
+
     public String getSongURL() {
         return songURL;
+    }
+
+    public void setSongURL(String songURL) {
+        this.songURL = songURL;
     }
 
     public String getArtistName() {
         return artistName;
     }
 
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
     public String getCoverImgURL() {
         return coverImgURL;
+    }
+
+    public void setCoverImgURL(String coverImgURL) {
+        this.coverImgURL = coverImgURL;
     }
 
     public int getId() {
@@ -78,21 +95,5 @@ public class Song {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public void setSongname(String songname) {
-        this.songname = songname;
-    }
-
-    public void setSongURL(String songURL) {
-        this.songURL = songURL;
-    }
-
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
-
-    public void setCoverImgURL(String coverImgURL) {
-        this.coverImgURL = coverImgURL;
     }
 }

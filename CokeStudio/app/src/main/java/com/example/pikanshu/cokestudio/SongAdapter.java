@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -33,12 +32,15 @@ public class SongAdapter extends ArrayAdapter<Song> {
 
     private Activity activity;
     private OnDownloadButtonClickListener callback;
+
     public SongAdapter(Context context, ArrayList<Song> songs) {
         super(context, 0, songs);
     }
-    void setOnDownloadButtonClickListener(OnDownloadButtonClickListener callback){
+
+    void setOnDownloadButtonClickListener(OnDownloadButtonClickListener callback) {
         this.callback = callback;
     }
+
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -47,8 +49,8 @@ public class SongAdapter extends ArrayAdapter<Song> {
 //        PlayerListView.list_scroll_position = position;
         View listItemView = convertView;
 
-        if(listItemView == null){
-            listItemView = LayoutInflater.from(getContext()).inflate(R.layout.song_list_item,parent,false);
+        if (listItemView == null) {
+            listItemView = LayoutInflater.from(getContext()).inflate(R.layout.song_list_item, parent, false);
         }
         final Song currentSong = getItem(position);
 
@@ -57,7 +59,6 @@ public class SongAdapter extends ArrayAdapter<Song> {
         TextView countryTextView = (TextView) listItemView.findViewById(R.id.artist_name);
         countryTextView.setText(currentSong.getArtistName());
 
-        ImageView image = (ImageView) listItemView.findViewById(R.id.song_cover_pic);
         final Context context = parent.getContext();
 
         // Loading image for imageView using picasso
@@ -67,10 +68,9 @@ public class SongAdapter extends ArrayAdapter<Song> {
         // fav icon action handling
         final ImageView fav = (ImageView) listItemView.findViewById(R.id.fav);
         int favourite = currentSong.isFavourite();
-        if(favourite == 1){
+        if (favourite == 1) {
             fav.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_favorite_filled));
-        }
-        else{
+        } else {
             fav.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_favorite_empty));
         }
 
@@ -81,39 +81,27 @@ public class SongAdapter extends ArrayAdapter<Song> {
                 DBManager dbManager = new DBManager(context);
                 dbManager.open();
                 int favourite = currentSong.isFavourite();
-                if(favourite == 1){
+                if (favourite == 1) {
                     fav.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_favorite_empty));
                     currentSong.setFavourite(0);
-                    dbManager.updateFavData(currentSong.getId(),0);
-                }
-                else{
+                    dbManager.updateFavData(currentSong.getId(), 0);
+                } else {
                     fav.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_favorite_filled));
                     currentSong.setFavourite(1);
-                    dbManager.updateFavData(currentSong.getId(),1);
+                    dbManager.updateFavData(currentSong.getId(), 1);
                 }
                 dbManager.close();
             }
         });
 
-        // arrow icon action handling
-        /*ImageView description = (ImageView) listItemView.findViewById(R.id.arrow);
-        description.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // starting decription activity
-                Intent intent = new Intent(context,DescriptionActivity.class);
-                intent.putExtra("player",currentPlayer);
-                context.startActivity(intent);
-            }
-        });*/
 
+        // download button handling
         ImageView download = (ImageView) listItemView.findViewById(R.id.download);
 
         final int downloaded = currentSong.isDownloaded();
-        if(downloaded == 1){
+        if (downloaded == 1) {
             download.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_file_downloaded));
-        }
-        else{
+        } else {
             download.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_file_download));
         }
 
@@ -121,40 +109,48 @@ public class SongAdapter extends ArrayAdapter<Song> {
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isStoragePermissionGranted(context)) {
-//                    ArrayList<String> param = new ArrayList<>();
-//                    param.add(currentSong.getSongname());
-//                    param.add(currentSong.getSongURL());
-//                    if(downloadFileTask != null)downloadFileTask.execute(param);
-                    if(downloaded == 0){
-                        Toast.makeText(context,"Download started !!",Toast.LENGTH_SHORT).show();
+                if (isStoragePermissionGranted(context)) {
+                    if (downloaded == 0) {
+                        Toast.makeText(context, "Download started !!", Toast.LENGTH_SHORT).show();
                         callback.onClick(currentSong);
-                    }
-                    else Toast.makeText(context,"Song already downloaded",Toast.LENGTH_SHORT).show();
+                    } else
+                        Toast.makeText(context, "Song already downloaded", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        // play button handling
+        ImageView play = (ImageView) listItemView.findViewById(R.id.play_pause);
+        play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MusicPlayer.class);
+                intent.putExtra("song", currentSong);
+                context.startActivity(intent);
             }
         });
         return listItemView;
     }
 
-    public  boolean isStoragePermissionGranted(Context context) {
+    // helper function to check permission
+    public boolean isStoragePermissionGranted(Context context) {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (ContextCompat.checkSelfPermission(context,android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(LOG_TAG,"Permission is granted");
+                Log.v(LOG_TAG, "Permission is granted");
                 return true;
             } else {
 
-                Log.v(LOG_TAG,"Permission is revoked");
-                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                Log.v(LOG_TAG, "Permission is revoked");
+                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(LOG_TAG,"Permission is granted");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(LOG_TAG, "Permission is granted");
             return true;
         }
     }
+
     public interface OnDownloadButtonClickListener {
         void onClick(Song song);
     }

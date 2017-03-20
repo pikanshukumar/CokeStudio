@@ -1,0 +1,23 @@
+Application Name : Coke Studio
+IDE Used         : Andorid Studio 2.3
+MinSdkVersion    : 19
+TargetSdkVersion : 25
+
+Key Features and Implementations :
+
+1. App fetches first time from API provided and writes the data to internal DB.
+2. Subsequent launches fetches data from DB.
+3. Favourites can be marked and filterd via action bar button.
+4. You can download song and download progress is updated in status notification.
+5. Already, Dowloaded songs have disabled icons.
+6. You can play a song by clicking on play button in every song item.
+7. Basic, Music Player is implemented and users can play,pause and stop songs.
+8. Users can use seek bar to move forward or backward using it.
+9. SeekBar is disabled when music in not playing.
+10.Volume button controls the stream volume.
+11.Songs are saved in external storage in folder name same as the application.
+12. Search by name can be used to find songs in the list.
+13. Searching is done by find in the search string in the song name.
+
+
+

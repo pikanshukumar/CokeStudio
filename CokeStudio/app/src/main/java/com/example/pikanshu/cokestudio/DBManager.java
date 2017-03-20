@@ -61,7 +61,7 @@ public class DBManager {
     }
 
 
-    // helper function to favourites player list from DB
+    // helper function to favourites song list from DB
     public ArrayList<Song> getFavouritesFromDB(int value) {
         ArrayList<Song> songList = new ArrayList<>();
 
@@ -75,34 +75,6 @@ public class DBManager {
         return songList;
     }
 
-    // helper function to get sorted list from DB(sort by matches)
-    /*public ArrayList<Player> getListSortedByMatchDataFromDB(SQLiteDatabase db){
-        ArrayList<Player> playerList = new ArrayList<>();
-
-        Iterable<Player> itr = cupboard().withDatabase(db)
-                .query(Player.class)
-                .orderBy("matchesPlayed asc").query();
-
-        for (Player Player : itr)
-            playerList.add(Player);
-
-        return playerList;
-    }
-
-    // helper function to get sorted list from DB (sort by runs)
-    public ArrayList<Player> getListSortedByRunDataFromDB(SQLiteDatabase db){
-        ArrayList<Player> playerList = new ArrayList<>();
-
-        Iterable<Player> itr = cupboard().withDatabase(db)
-                .query(Player.class)
-                .orderBy("totalScore asc").query();
-
-        for (Player Player : itr)
-            playerList.add(Player);
-
-        return playerList;
-    }*/
-
     // helper fuction to update favourites in DB
 
     public int updateFavData(int id, int value){
@@ -111,6 +83,7 @@ public class DBManager {
         return cupboard().withDatabase(db).update(Song.class, values, "_id = ?", Integer.toString(id));
     }
 
+    // helper fuction to update downloaded in DB
     public int updateDownloadedData(int id, int value){
         ContentValues values = new ContentValues(1);
         values.put("downloaded", value);

@@ -49,27 +49,23 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SONGS_REQUEST_URL =
             "http://starlord.hackerearth.com/edfora/cokestudio";
+
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL = 1;
-
+    public static boolean MODE_FAVOURITE = false;   // favourite option selection flag
+    // Download button click listener
+    SongAdapter.OnDownloadButtonClickListener callback;
     private Context mContext;
-
-
+    // variables for listview
     private ArrayList<Song> mSongsList;
     private SongAdapter mSongAdapter;
-
     private EditText searchEditText;
     private ListView mSongListView;
-
-    // Download complete callback
-    SongAdapter.OnDownloadButtonClickListener callback;
-//    DownloadFile downloadFileTask;
-
-    public static boolean MODE_FAVOURITE = false;   // favourite option selection flag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         searchEditText = (EditText) findViewById(R.id.search);
         mSongListView = (ListView) findViewById(R.id.songlist);
 
@@ -89,16 +85,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d("pika", " String : " + s.toString());
+//                Log.d("pika", " String : " + s.toString());
                 String searchString = searchEditText.getText().toString();
                 int textLength = searchString.length();
 
-                if(!searchString.isEmpty()){
+                if (!searchString.isEmpty()) {
                     ArrayList<Song> searchResult = new ArrayList<>();
-                    for(int i = 0; i < mSongsList.size(); i++){
+                    for (int i = 0; i < mSongsList.size(); i++) {
                         String songName = mSongsList.get(i).getSongname();
-                        if(textLength <= songName.length()){
-                            if(songName.toLowerCase().contains(searchString.toLowerCase())){
+                        if (textLength <= songName.length()) {
+                            if (songName.toLowerCase().contains(searchString.toLowerCase())) {
                                 searchResult.add(mSongsList.get(i));
                             }
 //                            if(searchString.equalsIgnoreCase(songName.substring(0,textLength)))
@@ -106,8 +102,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     updateListView(searchResult);
-                }
-                else{
+                } else {
                     updateListView();
                 }
             }
@@ -117,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
 
     }
 
@@ -137,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.favourites:
                 //Favourites action handling
 //                Log.d("pika", "Favourites Clicked");
-                if(MODE_FAVOURITE == false) {
+                if (MODE_FAVOURITE == false) {
 
 //                    Log.d("pika", "Favourites Clicked" + MODE_FAVOURITE);
                     item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_filled));
@@ -150,8 +143,7 @@ public class MainActivity extends AppCompatActivity {
                     updateListView();
 
                     MODE_FAVOURITE = true;
-                }
-                else if(MODE_FAVOURITE == true){
+                } else if (MODE_FAVOURITE == true) {
 //                    Log.d("pika", "Favourites Clicked" + MODE_FAVOURITE);
                     item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_empty));
 
@@ -172,11 +164,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if(callback == null) {
+
+        if (callback == null) {
             callback = new SongAdapter.OnDownloadButtonClickListener() {
                 @Override
                 public void onClick(Song song) {
-                    Log.d(LOG_TAG, "DownloadButton Clicked");
+//                    Log.d(LOG_TAG, "DownloadButton Clicked");
                     ArrayList<String> param = new ArrayList<>();
                     param.add(song.getSongname());
                     param.add(song.getSongURL());
@@ -185,27 +178,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
         }
+
         mSongsList = new ArrayList<>();
         GetSongsAsyncTask task = new GetSongsAsyncTask();
 
         // Database variables
         DBManager dbManager = new DBManager(this);
-
         dbManager.open();
-
         Song song = dbManager.get(1L);
 
-
-
-        if(song == null){
+        if (song == null) {
             dbManager.close();
             task.execute();
-            Log.d(LOG_TAG, "Async Task Executed");
-        }
-        else{
-            Log.d(LOG_TAG, "List Extracted from DB");
+//            Log.d(LOG_TAG, "Async Task Executed");
+        } else {
+//            Log.d(LOG_TAG, "List Extracted from DB");
 
-            mSongsList = dbManager.getListFromDb();
+            if(MODE_FAVOURITE == true)
+                mSongsList = dbManager.getFavouritesFromDB(1);
+            else mSongsList = dbManager.getListFromDb();
             dbManager.close();
             updateListView();
         }
@@ -226,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     // contacts-related task you need to do.
 
                 } else {
-                    Toast.makeText(this,"Can not download file",Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Can not download file", Toast.LENGTH_LONG).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -237,10 +228,11 @@ public class MainActivity extends AppCompatActivity {
             // permissions this app might request
         }
     }
+
     //function to update listview after change in players list
-    private void updateListView(){
+    private void updateListView() {
         //mMainList.invalidate();
-        mSongAdapter=new SongAdapter(this,mSongsList);
+        mSongAdapter = new SongAdapter(this, mSongsList);
         mSongAdapter.setOnDownloadButtonClickListener(callback);
         mSongListView.setAdapter(mSongAdapter);
         mSongAdapter.notifyDataSetChanged();
@@ -249,15 +241,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //arg arraylist will be used for arrayadapter (used for search option)
-    private void updateListView(ArrayList<Song> songList){
+    private void updateListView(ArrayList<Song> songList) {
         //mMainList.invalidate();
-        mSongAdapter=new SongAdapter(this,songList);
+        mSongAdapter = new SongAdapter(this, songList);
         mSongAdapter.setOnDownloadButtonClickListener(callback);
         mSongListView.setAdapter(mSongAdapter);
         mSongAdapter.notifyDataSetChanged();
     }
 
-    // JSON parsing fuction to create players list fron jsonResponse string
+    // JSON parsing fuction to create songs list fron jsonResponse string
     private void getSongsFormJSON(String jsonResponse) {
 
         // Database variables
@@ -267,22 +259,16 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             JSONArray songs = new JSONArray(jsonResponse);
-            for (int i=0; i<songs.length(); i++) {
+            for (int i = 0; i < songs.length(); i++) {
                 JSONObject song = songs.getJSONObject(i);
 
                 // creating Song object
-                Song tempSong = new Song(song,i+1);
+                final Song tempSong = new Song(song, i + 1);
                 // adding Song object to songslist
                 mSongsList.add(tempSong);
-                long id = dbManager.write(tempSong);
-                Log.d("MainActivity", "Saving Song " + tempSong.getSongname() + " " + id);
-/*
-                Log.d("MainActivity", "Saving Song " + tempSong.getArtistName() + " " + id);
-                Log.d("MainActivity", "Saving Song " + tempSong.getSongURL() + " " + id);
-                Log.d("MainActivity", "Saving Song " + tempSong.getCoverImgURL() + " " + id);
-                Log.d("MainActivity", "Saving Song " + tempSong.getId() + " " + id);
-*/
 
+                // adding song object to DB
+                dbManager.write(tempSong);
 
             }
         } catch (JSONException e) {
@@ -293,6 +279,44 @@ public class MainActivity extends AppCompatActivity {
 
         updateListView();
     }
+
+    public boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+//                Log.v(LOG_TAG,"Permission is granted");
+                return true;
+            } else {
+
+//                Log.v(LOG_TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        } else { //permission is automatically granted on sdk<23 upon installation
+//            Log.v(LOG_TAG,"Permission is granted");
+            return true;
+        }
+    }
+
+    // helper function after download is finished
+    private void OnDownloadFinish(String songName) {
+
+        Toast.makeText(this, "Download Finished !!", Toast.LENGTH_SHORT).show();
+        DBManager dbManager = new DBManager(this);
+        dbManager.open();
+
+        for (int i = 0; i < mSongsList.size(); i++) {
+            Song song = mSongsList.get(i);
+            if (song.getSongname().equalsIgnoreCase(songName.toLowerCase())) {
+                song.setDownloaded(1);
+                dbManager.updateDownloadedData(song.getId(), 1);
+                break;
+            }
+        }
+        dbManager.close();
+        updateListView();
+    }
+
     // Async task used for retrieving json string by api calling
     private class GetSongsAsyncTask extends AsyncTask<URL, Void, String> {
 
@@ -337,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 url = new URL(stringUrl);
             } catch (MalformedURLException exception) {
-                Log.e(LOG_TAG, "Error with creating URL", exception);
+//                Log.e(LOG_TAG, "Error with creating URL", exception);
                 return null;
             }
             return url;
@@ -391,44 +415,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public  boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Log.v(LOG_TAG,"Permission is granted");
-                return true;
-            } else {
-
-                Log.v(LOG_TAG,"Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(LOG_TAG,"Permission is granted");
-            return true;
-        }
-    }
-
-
-    private void OnDownloadFinish(String songName){
-
-        Toast.makeText(this,"Download Finished !!",Toast.LENGTH_SHORT).show();
-        DBManager dbManager = new DBManager(this);
-        dbManager.open();
-
-        for(int i = 0; i < mSongsList.size(); i++){
-            Song song = mSongsList.get(i);
-            if(song.getSongname().equalsIgnoreCase(songName.toLowerCase())){
-                song.setDownloaded(1);
-                dbManager.updateDownloadedData(song.getId(),1);
-                break;
-            }
-        }
-        dbManager.close();
-        updateListView();
-    }
-
+    // Async task used for downloading song
     public class DownloadFile extends AsyncTask<ArrayList<String>, Integer, String> {
 
         NotificationManager mNotifyManager;
@@ -439,8 +426,6 @@ public class MainActivity extends AppCompatActivity {
 
         private String appName;
 
-//        public DownloadFinished callback;
-
         public DownloadFile(Context context) {
             this.mContext = context;
         }
@@ -448,21 +433,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             mNotifyManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder       = new Notification.Builder(mContext);
+            mBuilder = new Notification.Builder(mContext);
 
             mBuilder.setContentTitle("Song Download")
                     .setContentText("Download in progress")
                     .setSmallIcon(R.drawable.ic_file_download);
 
             mBuilder.setProgress(100, 0, false);
+
             // Displays the progress bar for the first time.
             mNotifyManager.notify(ID, mBuilder.build());
 
             appName = mContext.getApplicationInfo().loadLabel(mContext.getPackageManager()).toString();
-            storageDir = new File(Environment.getExternalStorageDirectory(),appName);
-            Log.d("download", storageDir.getAbsolutePath().toString());
 
-            if(!storageDir.exists()){
+            // storage dir for songs
+            storageDir = new File(Environment.getExternalStorageDirectory(), appName);
+//            Log.d("download", storageDir.getAbsolutePath().toString());
+
+            if (!storageDir.exists()) {
                 storageDir.mkdirs();
             }
             super.onPreExecute();
@@ -476,6 +464,7 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection conn = null;
             ArrayList<String> passed = null;
             try {
+                // passed[0] -> songName passed[1] -> songUrl
                 passed = urlParams[0]; // get passed arraylist
 
                 mBuilder.setContentTitle(appName + " : " + passed.get(0));
@@ -485,6 +474,7 @@ public class MainActivity extends AppCompatActivity {
                 conexion = (HttpURLConnection) url.openConnection();
                 conexion.setInstanceFollowRedirects(false);
 
+                // getting a redirected url
                 URL secondURL = new URL(conexion.getHeaderField("Location"));
 
                 conn = (HttpURLConnection) secondURL.openConnection();
@@ -496,14 +486,14 @@ public class MainActivity extends AppCompatActivity {
                 // this will be useful so that you can show a tipical 0-100% progress bar
                 int lenghtOfFile = conn.getContentLength();
 
-                Log.d("download", "1st URL :" + url.toString() );
-                Log.d("download", "2nd URL :" +  secondURL.toString());
-                Log.d("download", " Data Length:" + lenghtOfFile );
+//                Log.d("download", "1st URL :" + url.toString() );
+//                Log.d("download", "2nd URL :" +  secondURL.toString());
+//                Log.d("download", " Data Length:" + lenghtOfFile );
 
                 // downlod the file
                 InputStream input = new BufferedInputStream(secondURL.openStream());
-                Log.d("download",storageDir.toString()+File.separator+passed.get(0)+".mp3");
-                OutputStream output = new FileOutputStream(storageDir.toString()+File.separator+passed.get(0)+".mp3");
+//                Log.d("download",storageDir.toString()+File.separator+passed.get(0)+".mp3");
+                OutputStream output = new FileOutputStream(storageDir.toString() + File.separator + passed.get(0) + ".mp3");
 
                 byte data[] = new byte[1024];
 
@@ -514,15 +504,15 @@ public class MainActivity extends AppCompatActivity {
                     total += count;
                     // publishing the progress....
                     int progressValue = (int) (total * 100 / lenghtOfFile);
-                    int temp = progressValue/interval;
+                    int temp = progressValue / interval;
 
-                    if( temp > 0 ){
+                    if (temp > 0) {
                         publishProgress(progressValue);
                         interval += 10;
                     }
                     output.write(data, 0, count);
                 }
-                Log.d("download", " Writing Data Complete");
+//                Log.d("download", " Writing Data Complete");
                 output.flush();
                 output.close();
                 input.close();
@@ -532,16 +522,16 @@ public class MainActivity extends AppCompatActivity {
                     conexion.disconnect();
                 }
             }
-            if(passed != null) return passed.get(0);
-            return  null;
+            if (passed != null) return passed.get(0);
+            return null;
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
 
-            if(mBuilder != null){
+            if (mBuilder != null) {
                 Log.d("download", "Progress : " + values[0]);
-                mBuilder.setProgress(100,values[0],false);
+                mBuilder.setProgress(100, values[0], false);
                 // Displays the progress bar for the first time.
                 mNotifyManager.notify(ID, mBuilder.build());
             }
@@ -552,7 +542,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             // When the loop is finished, updates the notification
 
-            if(mBuilder != null) {
+            if (mBuilder != null) {
                 mBuilder.setContentText("Download complete")
                         // Removes the progress bar
                         .setProgress(0, 0, false);
@@ -564,6 +554,4 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-
 }
